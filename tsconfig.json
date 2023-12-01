@@ -19,7 +19,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "pages/api/auth/register.js"
+    "pages/api/auth/register.js",
+    "pages/api/stripe-session/route.js"
   ],
   "exclude": ["node_modules"]
 }

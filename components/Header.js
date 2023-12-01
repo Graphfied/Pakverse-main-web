@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import Link from "next/link";
+import { useState } from "react";
 
 export default function Header() {
   const [navbarOpen, setNavbarOpen] = useState(false);
@@ -37,8 +38,8 @@ export default function Header() {
         </div>
         <div
           className={
-            'mt-3 flex-grow items-start md:flex lg:mt-0' +
-            (navbarOpen ? ' flex' : ' hidden')
+            "mt-3 flex-grow items-start md:flex lg:mt-0" +
+            (navbarOpen ? " flex" : " hidden")
           }
         >
           <div className="flex-col pl-4 text-xl md:flex-grow md:pl-0">
@@ -94,6 +95,14 @@ export default function Header() {
                     ></path>
                   </svg>
                 </a>
+              </li>
+              <li>
+                <Link
+                  href="/login"
+                  className="text-lg text-white md:text-white hover:text-gray-300 md:hover:text-gray-700"
+                >
+                  Login
+                </Link>
               </li>
             </ul>
           </div>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ScrollAnimation from "../components/ScrollAnimation";
 import { pricing } from "../constants/pricing";
-
+import getStripePromise from "./../lib/stripe";
 const Feature = ({ featureText }) => {
   return (
     <li className="flex">
@@ -26,6 +26,22 @@ const Feature = ({ featureText }) => {
 };
 
 export default function Pricing() {
+  const handleCheckout = async (products) => {
+    const userId = 1;
+    const stripe = await getStripePromise();
+    const response = await fetch("/api/stripe-session/route", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-cache",
+      body: JSON.stringify({ userId, data: products }),
+    });
+    console.log(response);
+    const data = await response.json();
+    if (data.session) {
+      stripe?.redirectToCheckout({ sessionId: data.session.id });
+    }
+    console.log("🚀 ~ file: Pricing.js:37 ~ handleCheckout ~ response:", data);
+  };
   return (
     <section
       id="pricing"
@@ -89,6 +105,16 @@ export default function Pricing() {
                     ? "px-5 py-6 font-semibold text-gray-800 transition ease-in-out transform bg-white rounded-full shadow-md bg-opacity-70 hover:-translate-y-0.5 hover:bg-opacity-100 hover:bg-blue-100  focus:outline-none"
                     : "px-5 py-6 font-semibold text-gray-100 transition duration-300 ease-in-out transform rounded-full shadow bg-gradient-to-t from-sky-800 to-sky-600 hover:-translate-y-1 hover:shadow-lg hover:bg-blue-100  focus:outline-none"
                 }
+                onClick={() => {
+                  handleCheckout([
+                    {
+                      name: price.name,
+                      description: price.description,
+                      duration: 1,
+                      price: price.price_in_dollars,
+                    },
+                  ]);
+                }}
               >
                 Get Started{" "}
                 <svg
