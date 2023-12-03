@@ -1,7 +1,40 @@
+import axios from "axios";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import { errToast, successToast } from "./../../utils/toast";
+import { useRouter } from "next/router";
+import { useStore } from "../../lib/store/store";
 
 const index = () => {
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loader, setLoader] = useState(false);
+  const login = useStore((store) => store.login);
+  const onChangeHandler = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const router = useRouter();
+  const onLoginHandler = async (e) => {
+    try {
+      e.preventDefault();
+      setLoader(true);
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+      const resp = await axios.post("/api/auth/login", { ...formData });
+      console.log("🚀 ~ file: index.jsx:22 ~ onLoginHandler ~ resp:", resp);
+      if (resp.data.status !== 200) {
+        return errToast(resp.data.message);
+        if (resp.data.status === 400) {
+          return router.push("/register");
+        }
+      }
+      login(resp.data.data);
+      router.push("/");
+      return successToast(resp.data.message);
+    } catch (error) {
+      errToast(error.message);
+    } finally {
+      setLoader(false);
+    }
+  };
   return (
     <>
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -25,9 +58,11 @@ const index = () => {
                   id="email"
                   name="email"
                   type="email"
+                  value={formData.email}
+                  onChange={onChangeHandler}
                   autoComplete="email"
                   required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
@@ -55,8 +90,10 @@ const index = () => {
                   name="password"
                   type="password"
                   autoComplete="current-password"
+                  value={formData.password}
+                  onChange={onChangeHandler}
                   required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className=" px-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
@@ -65,8 +102,10 @@ const index = () => {
               <button
                 type="submit"
                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                onClick={onLoginHandler}
+                disabled={loader}
               >
-                Sign in
+                {loader ? "Loading..." : "Sign in"}{" "}
               </button>
             </div>
           </form>

@@ -50,7 +50,6 @@ const handler = async (req, res) => {
         _id: users._id,
         name: users.name,
         email: users.email,
-        role: users.role,
       });
 
     const data = {
@@ -67,7 +66,7 @@ const handler = async (req, res) => {
       path: "/",
     });
     res.setHeader("Set-Cookie", serialized);
-    res.status(200).json({ authToken });
+    res.status(200).json({ authToken, data: query[0], status: 200 });
   } catch (error) {
     console.log("POST request error:", error);
     return res.json({ status: 500, message: "Internal Server Error" });

@@ -1,6 +1,46 @@
 import Link from "next/link";
-
+import { useState } from "react";
+import { errToast, successToast } from "./../../utils/toast";
+import { useRouter } from "next/router";
+import axios from "axios";
+import { useStore } from "../../lib/store/store";
 export default function Example() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const register = useStore((state) => state.register);
+  const router = useRouter();
+  const [loader, setLoader] = useState(false);
+  const onChangeHandler = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const onSignUpHandler = async (e) => {
+    try {
+      e.preventDefault();
+      setLoader(true);
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+      const resp = await axios.post("/api/auth/register", { ...formData });
+      console.log(
+        "🚀 ~ file: index.jsx:23 ~ onSignUpHandler ~ resp:",
+        resp.data.data
+      );
+      if (resp.data.status !== 200) {
+        return errToast(resp.data.message);
+        if (resp.data.status === 400) {
+          return router.push("/register");
+        }
+      }
+      register(resp.data.data);
+      router.push("/");
+      return successToast(resp.data.message);
+    } catch (error) {
+      errToast(error.message);
+    } finally {
+      setLoader(false);
+    }
+  };
   return (
     <>
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -24,8 +64,10 @@ export default function Example() {
                   id="name"
                   name="name"
                   type="text"
+                  onChange={onChangeHandler}
                   required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  value={formData.name}
+                  className="px-4 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
@@ -41,9 +83,11 @@ export default function Example() {
                   id="email"
                   name="email"
                   type="email"
+                  onChange={onChangeHandler}
+                  value={formData.email}
                   autoComplete="email"
                   required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="px-4 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
@@ -70,9 +114,11 @@ export default function Example() {
                   id="password"
                   name="password"
                   type="password"
+                  onChange={onChangeHandler}
                   autoComplete="current-password"
                   required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  value={formData.password}
+                  className="px-4 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
@@ -81,6 +127,7 @@ export default function Example() {
               <button
                 type="submit"
                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                onClick={onSignUpHandler}
               >
                 Sign up
               </button>

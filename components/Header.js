@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { useState } from "react";
-
+import { useStore } from "./../lib/store/store";
 export default function Header() {
   const [navbarOpen, setNavbarOpen] = useState(false);
+  const user = useStore((store) => store.initialState.user);
+  console.log("🚀 ~ file: Header.js:8 ~ Header ~ user:", user);
+  const isAuth = useStore((store) => store.initialState.isAuthenticated);
   return (
     <header>
       <div className="flex flex-col px-4 pt-4 mx-auto text-white roboto-regular max-w-7xl md:mx-10 lg:mx-20 xl:mx-auto md:flex-row md:items-center md:justify-between">
@@ -97,12 +100,16 @@ export default function Header() {
                 </a>
               </li>
               <li>
-                <Link
-                  href="/login"
-                  className="text-lg text-white md:text-white hover:text-gray-300 md:hover:text-gray-700"
-                >
-                  Login
-                </Link>
+                {isAuth ? (
+                  <p className="text-white">{user.name}</p>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="text-lg text-white md:text-white hover:text-gray-300 md:hover:text-gray-700"
+                  >
+                    Login
+                  </Link>
+                )}
               </li>
             </ul>
           </div>
